@@ -39,3 +39,15 @@
 
 # debug information files
 *.dwo
+
+# cache
+*.cache
+
+# editors
+*.vscode
+*.zed
+*.idea
+*.cursor
+
+# build
+build/
