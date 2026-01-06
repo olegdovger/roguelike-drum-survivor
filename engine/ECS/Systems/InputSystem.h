@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../System.h"
 #include <SFML/Window/Keyboard.hpp>
+
+#include "../System.h"
 
 class InputSystem : public System
 {

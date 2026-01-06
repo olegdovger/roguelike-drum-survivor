@@ -1,9 +1,7 @@
 #include "RenderSystem.h"
 #include "../ECSManager.h"
 #include "../Components.h"
-#include "../../GameState.h"
-
-#include <SFML/Graphics.hpp>
+#include "src/GameState.h"
 
 void RenderSystem::setWindow(sf::RenderWindow* win)
 {

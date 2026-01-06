@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../System.h"
 #include <SFML/Graphics.hpp>
+
+#include "../System.h"
 
 class ResizeSystem : public System
 {
@@ -10,8 +11,6 @@ public:
     void update(float deltaTime, ECSManager& ecs) override;
 
 private:
-    void handleEvents();
-
     sf::RenderWindow* window = nullptr;
     unsigned int lastWidth = 0;
     unsigned int lastHeight = 0;

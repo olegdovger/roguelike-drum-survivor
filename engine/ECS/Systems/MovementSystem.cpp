@@ -1,7 +1,6 @@
 #include "MovementSystem.h"
 #include "../ECSManager.h"
 #include "../Components.h"
-#include <SFML/Graphics.hpp>
 
 void MovementSystem::update(float deltaTime, ECSManager& ecs)
 {

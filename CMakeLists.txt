@@ -107,11 +107,11 @@ endif()
 add_executable(${PROJECT_NAME}
     game.cpp
     src/Game.cpp
-    src/ECS/ECSManager.cpp
-    src/ECS/Systems/InputSystem.cpp
-    src/ECS/Systems/MovementSystem.cpp
-    src/ECS/Systems/RenderSystem.cpp
-    src/ECS/Systems/ResizeSystem.cpp
+    engine/ECS/ECSManager.cpp
+    engine/ECS/Systems/InputSystem.cpp
+    engine/ECS/Systems/MovementSystem.cpp
+    engine/ECS/Systems/RenderSystem.cpp
+    engine/ECS/Systems/ResizeSystem.cpp
 )
 
 # Link SFML libraries
@@ -124,7 +124,7 @@ if(TARGET SFML::System)
     )
 else()
     # Manual linking
-    target_include_directories(${PROJECT_NAME} PRIVATE ${SFML_INCLUDE_DIR})
+    target_include_directories(${PROJECT_NAME} PRIVATE ${SFML_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
     # Link libraries
     target_link_libraries(${PROJECT_NAME}

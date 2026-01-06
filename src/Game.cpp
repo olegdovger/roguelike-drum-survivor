@@ -1,10 +1,9 @@
 #include <stdexcept>
 
 #include "GameState.h"
-#include "ECS/Components.h"
+#include "../engine/ECS/Components.h"
 #include "Game.h"
-#include "Events.h"
-#include "SFML/System/Vector2.hpp"
+#include "../engine/Events.h"
 
 Game::Game()
     : window(sf::VideoMode({GAME_STATE.WINDOW_WIDTH, GAME_STATE.WINDOW_HEIGHT}),

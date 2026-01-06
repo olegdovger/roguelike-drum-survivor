@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Component.h"
 #include <SFML/Graphics.hpp>
 #include <cmath>
+
+#include "Component.h"
 
 
 struct PositionComponent : public Component

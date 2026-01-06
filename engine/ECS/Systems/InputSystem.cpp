@@ -1,7 +1,6 @@
 #include "InputSystem.h"
 #include "../ECSManager.h"
 #include "../Components.h"
-#include <SFML/Window/Keyboard.hpp>
 
 void InputSystem::update(float deltaTime, ECSManager& ecs)
 {

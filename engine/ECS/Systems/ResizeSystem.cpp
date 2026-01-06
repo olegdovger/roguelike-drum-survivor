@@ -1,7 +1,6 @@
 #include "ResizeSystem.h"
 #include "../ECSManager.h"
-#include "../../GameState.h"
-#include <SFML/Graphics.hpp>
+#include "src/GameState.h"
 
 void ResizeSystem::setWindow(sf::RenderWindow* win)
 {
