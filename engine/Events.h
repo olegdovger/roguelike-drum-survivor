@@ -4,12 +4,25 @@
 
 enum class EventType { Closed, Resized, KeyPressed, Unknown };
 
+struct EventVisitor {
+    EventType operator()(const sf::Event::Closed&) const {
+        return EventType::Closed;
+    }
+
+    EventType operator()(const sf::Event::Resized&) const {
+        return EventType::Resized;
+    }
+
+    EventType operator()(const sf::Event::KeyPressed&) const {
+        return EventType::KeyPressed;
+    }
+
+    template <typename T>
+    EventType operator()(const T&) const {
+        return EventType::Unknown;
+    }
+};
+
 inline EventType getEventType(const sf::Event &event) {
-  if (event.is<sf::Event::Closed>())
-    return EventType::Closed;
-  if (event.is<sf::Event::Resized>())
-    return EventType::Resized;
-  if (event.is<sf::Event::KeyPressed>())
-    return EventType::KeyPressed;
-  return EventType::Unknown;
+  return event.visit(EventVisitor{});
 }
