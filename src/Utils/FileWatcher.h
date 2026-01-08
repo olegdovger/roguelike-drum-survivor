@@ -7,7 +7,6 @@
 #include <atomic>
 #include <string>
 
-// Forward declaration to avoid including Live++ header
 namespace lpp
 {
     struct LppDefaultAgent;
@@ -42,7 +41,6 @@ public:
      */
     ~FileWatcher();
 
-    // Disable copy and move to prevent issues with thread and atomic members
     FileWatcher(const FileWatcher&) = delete;
     FileWatcher& operator=(const FileWatcher&) = delete;
     FileWatcher(FileWatcher&&) = delete;

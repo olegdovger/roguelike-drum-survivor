@@ -15,7 +15,6 @@ public:
     }
 
     Config() {
-        // Try to find config file in multiple locations
         std::string configPath = findConfigFile();
         if (!configPath.empty()) {
             load(configPath);
@@ -77,12 +76,11 @@ private:
     }
 
     std::string findConfigFile() {
-        // Check multiple locations for config file
         std::vector<std::string> possiblePaths = {
-            "config.ini",           // Current directory
-            "../config.ini",        // Parent directory (for development)
-            "../config/config.ini", // Config subdirectory
-            "config/config.ini"     // Config subdirectory in current dir
+            "config.ini",
+            "../config.ini",
+            "../config/config.ini",
+            "config/config.ini"
         };
 
         for (const auto& path : possiblePaths) {
@@ -102,7 +100,6 @@ private:
         while (std::getline(file, line)) {
             if (line.empty()) continue;
             
-            // Trim leading/trailing whitespace including \r for Windows compatibility
             size_t first = line.find_first_not_of(" \t\r\n");
             if (first == std::string::npos) continue;
             size_t last = line.find_last_not_of(" \t\r\n");
@@ -116,14 +113,12 @@ private:
                     std::string keyPart = line.substr(0, delimiterPos);
                     std::string valuePart = line.substr(delimiterPos + 1);
 
-                    // Trim key
                     size_t kFirst = keyPart.find_first_not_of(" \t");
                     size_t kLast = keyPart.find_last_not_of(" \t");
                     if (kFirst != std::string::npos) {
                         keyPart = keyPart.substr(kFirst, (kLast - kFirst + 1));
                     }
 
-                    // Trim value
                     size_t vFirst = valuePart.find_first_not_of(" \t\r\n");
                     size_t vLast = valuePart.find_last_not_of(" \t\r\n");
                     if (vFirst != std::string::npos) {

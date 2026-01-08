@@ -19,12 +19,13 @@ Game::Game()
   }
 
   // Ensure config is loaded initially
-  Config::get().update();
+    Config::get().update();
 
-  window.setFramerateLimit(Config::get().getInt("Window.TARGET_FPS", 60));
+    Config::get().update();
 
-  // Initialize view with letterboxing for initial window size
-  GAME_STATE.updateView(window.getSize());
+    window.setFramerateLimit(Config::get().getInt("Window.TARGET_FPS", 60));
+
+    GAME_STATE.updateView(window.getSize());
   window.setView(GAME_STATE.currentView);
 
   inputSystem = std::make_shared<InputSystem>();
@@ -82,7 +83,7 @@ void Game::handleEvents() {
 }
 
 void Game::update(float deltaTime) {
-  configSystem->update(deltaTime, ecs); // Run config updates first
+  configSystem->update(deltaTime, ecs);
   inputSystem->update(deltaTime, ecs);
   movementSystem->update(deltaTime, ecs);
   resizeSystem->update(deltaTime, ecs);

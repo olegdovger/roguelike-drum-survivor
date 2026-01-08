@@ -11,6 +11,6 @@ public:
     void update(float deltaTime, ECSManager& ecs) override;
 
 private:
-    bool m_dirty = true; // Force initial update
+    bool m_dirty = true;
     size_t m_callbackId = 0;
 };

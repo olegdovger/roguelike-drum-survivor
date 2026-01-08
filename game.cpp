@@ -6,7 +6,6 @@
 #include "src/Utils/FileWatcher.h"
 #include "LPP_API_x64_CPP.h"
 
-// Helper function to get executable directory
 std::wstring GetExecutableDirectory() {
     wchar_t path[MAX_PATH] = {0};
     if (GetModuleFileNameW(nullptr, path, MAX_PATH) > 0) {
@@ -25,7 +24,6 @@ int main()
     std::wstring exeDir = GetExecutableDirectory();
     std::wstring livePPPath = exeDir + L"ThirdParty\\LivePP\\LivePP";
     
-    // Initialize Live++
     lpp::LppDefaultAgent lppAgent = lpp::LppCreateDefaultAgent(nullptr, livePPPath.c_str());
 
     if (lpp::LppIsValidDefaultAgent(&lppAgent))
@@ -33,8 +31,6 @@ int main()
         lppAgent.EnableModule(lpp::LppGetCurrentModulePath(), lpp::LPP_MODULES_OPTION_ALL_IMPORT_MODULES, nullptr, nullptr);
     }
 
-    // Start file watcher for auto hot-reload (500ms timeout) - only in development
-    // Watch the current directory (where executable is located)
     std::unique_ptr<FileWatcher> fileWatcher;
     if (FileWatcher::shouldEnableFileWatching()) {
         fileWatcher = std::make_unique<FileWatcher>(exeDir, &lppAgent, 500);

@@ -18,7 +18,6 @@ ConfigSystem::~ConfigSystem() {
 void ConfigSystem::update(float deltaTime, ECSManager& ecs) {
     if (!m_dirty) return;
 
-    // Fetch updated values
     float playerSize = Config::get().getFloat("Player.SIZE", 64.0f);
     float playerSpeed = Config::get().getFloat("Player.MOVE_SPEED", 800.0f);
 
@@ -32,8 +31,6 @@ void ConfigSystem::update(float deltaTime, ECSManager& ecs) {
         static_cast<std::uint8_t>(std::clamp(b, 0, 255))
     );
 
-    // Update Player entities
-    // We identify players by having InputComponent (assuming only players have input for now)
     auto inputEntities = ecs.getEntitiesWithComponent<InputComponent>();
 
     for (auto entity : inputEntities) {

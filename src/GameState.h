@@ -13,7 +13,6 @@ public:
       return instance;
     }
 
-    // View management
     sf::View currentView;
 
     void updateView(const sf::Vector2u& windowSize);

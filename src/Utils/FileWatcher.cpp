@@ -6,10 +6,8 @@
 namespace fs = std::filesystem;
 
 bool FileWatcher::shouldEnableFileWatching() {
-    // Check for development environment indicators
     std::error_code ec;
     
-    // Look for common development files/directories
     bool hasDevFiles = 
         fs::exists(".git", ec) ||
         fs::exists(".vscode", ec) ||
@@ -79,7 +77,6 @@ void FileWatcher::scanFiles()
     
     try
     {
-        // Convert to absolute path to handle relative paths consistently
         fs::path absolutePath = fs::absolute(m_watchPath);
         
         if (fs::exists(absolutePath) && fs::is_directory(absolutePath))
@@ -107,7 +104,6 @@ bool FileWatcher::hasFileChanged()
 {
     try
     {
-        // Convert to absolute path to handle relative paths consistently
         fs::path absolutePath = fs::absolute(m_watchPath);
         
         if (fs::exists(absolutePath) && fs::is_directory(absolutePath))
