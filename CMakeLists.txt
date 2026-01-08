@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
+set(CMAKE_POLICY_VERSION_MINIMUM "3.5")
 project(roguelike-samurai)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-w)
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -7,290 +12,60 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Generate compile_commands.json for IntelliSense
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Try to find SFML 3.0.0 manually (SFML 3.0 CMake config has issues, so we use manual setup)
-set(SFML_FOUND FALSE)
-
-# Prioritize SFML-3.0.0 installation
-set(SFML_ROOT_SEARCH_PATHS
-        "C:/SFML-3.0.0"
-        "C:/msys64/ucrt64"
-        "C:/msys64/mingw64"
-        "C:/msys64/usr"
-    )
-
-    foreach(SEARCH_PATH ${SFML_ROOT_SEARCH_PATHS})
-        if(EXISTS "${SEARCH_PATH}/include/SFML")
-            set(SFML_ROOT ${SEARCH_PATH})
-            set(SFML_INCLUDE_DIR "${SEARCH_PATH}/include")
-            set(SFML_LIB_DIR "${SEARCH_PATH}/lib")
-            message(STATUS "Found SFML at: ${SFML_ROOT}")
-            break()
-        endif()
-    endforeach()
-
-    if(SFML_ROOT)
-        # Detect compiler type to choose correct library format
-        if(MSVC)
-            # For MSVC, prefer .lib files
-            set(SFML_LIB_NAMES_SYSTEM "sfml-system" "sfml-system.lib")
-            set(SFML_LIB_NAMES_WINDOW "sfml-window" "sfml-window.lib")
-            set(SFML_LIB_NAMES_GRAPHICS "sfml-graphics" "sfml-graphics.lib")
-        else()
-            # For MinGW/GCC, use .a files (static libraries)
-            set(SFML_LIB_NAMES_SYSTEM "libsfml-system.a" "sfml-system.a")
-            set(SFML_LIB_NAMES_WINDOW "libsfml-window.a" "sfml-window.a")
-            set(SFML_LIB_NAMES_GRAPHICS "libsfml-graphics.a" "sfml-graphics.a")
-            # Additional dependencies for static linking
-            set(SFML_STATIC_DEPS
-                "C:/SFML-3.0.0/lib/libfreetype.a"
-                "C:/SFML-3.0.0/lib/libogg.a"
-                "C:/SFML-3.0.0/lib/libvorbis.a"
-                "C:/SFML-3.0.0/lib/libvorbisfile.a"
-                "C:/SFML-3.0.0/lib/libFLAC.a"
-                "-lopengl32"
-                "-lwinmm"
-                "-lgdi32"
-                "-lkernel32"
-                "-luser32"
-                "-lgdi32"
-                "-lwinspool"
-                "-lshell32"
-                "-lole32"
-                "-loleaut32"
-                "-luuid"
-                "-lcomdlg32"
-                "-ladvapi32"
-                "-static-libgcc"
-                "-static-libstdc++"
-                # "-Wl,--subsystem,windows"  # Commented out for debugging - shows console window
-            )
-        endif()
-
-        # Find libraries manually
-        find_library(SFML_SYSTEM_LIB
-            NAMES ${SFML_LIB_NAMES_SYSTEM}
-            PATHS ${SFML_LIB_DIR}
-            NO_DEFAULT_PATH
-        )
-        find_library(SFML_WINDOW_LIB
-            NAMES ${SFML_LIB_NAMES_WINDOW}
-            PATHS ${SFML_LIB_DIR}
-            NO_DEFAULT_PATH
-        )
-        find_library(SFML_GRAPHICS_LIB
-            NAMES ${SFML_LIB_NAMES_GRAPHICS}
-            PATHS ${SFML_LIB_DIR}
-            NO_DEFAULT_PATH
-        )
-
-        if(SFML_SYSTEM_LIB AND SFML_WINDOW_LIB AND SFML_GRAPHICS_LIB)
-            set(SFML_FOUND TRUE)
-            message(STATUS "SFML libraries found:")
-            message(STATUS "  System: ${SFML_SYSTEM_LIB}")
-            message(STATUS "  Window: ${SFML_WINDOW_LIB}")
-            message(STATUS "  Graphics: ${SFML_GRAPHICS_LIB}")
-        else()
-            message(WARNING "Could not find all SFML libraries")
-        endif()
-    endif()
-
-if(NOT SFML_FOUND)
-    if(MSVC)
-        message(FATAL_ERROR "SFML 3.0 not found! Please install SFML or set SFML_ROOT environment variable.")
-    else()
-        message(FATAL_ERROR "SFML 3.0 not found for MinGW compiler!")
-        message(FATAL_ERROR "Please check that SFML 3.0 is installed at C:/SFML-3.0.0")
-    endif()
-endif()
+# Use FetchContent to get SFML
+include(FetchContent)
+FetchContent_Declare(
+    sfml
+    GIT_REPOSITORY https://github.com/SFML/SFML.git
+    GIT_TAG        3.0.0
+)
+# SFML options
+set(SFML_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(SFML_BUILD_DOC OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(sfml)
 
 # Add executable
 add_executable(${PROJECT_NAME}
     game.cpp
     src/Game.cpp
+    src/GameState.cpp
+    src/Utils/FileWatcher.cpp
     engine/ECS/ECSManager.cpp
     engine/ECS/Systems/InputSystem.cpp
     engine/ECS/Systems/MovementSystem.cpp
     engine/ECS/Systems/RenderSystem.cpp
     engine/ECS/Systems/ResizeSystem.cpp
+    engine/ECS/Systems/ConfigSystem.cpp
 )
 
-# Link SFML libraries
-if(TARGET SFML::System)
-    # Modern CMake targets
-    target_link_libraries(${PROJECT_NAME}
-        SFML::System
-        SFML::Window
-        SFML::Graphics
-    )
-else()
-    # Manual linking
-    target_include_directories(${PROJECT_NAME} PRIVATE ${SFML_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+# Link SFML libraries (using targets from FetchContent)
+target_link_libraries(${PROJECT_NAME} PRIVATE SFML::Graphics SFML::Window SFML::System)
 
-    # Link libraries
-    target_link_libraries(${PROJECT_NAME}
-        ${SFML_SYSTEM_LIB}
-        ${SFML_WINDOW_LIB}
-        ${SFML_GRAPHICS_LIB}
-        ${SFML_STATIC_DEPS}
-    )
+# Live++ Integration
+target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/LivePP/LivePP/API/x64" ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Compile/Link flags for Live++ with MSVC/Clang-CL
+if(MSVC OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    # /Z7 = Debug info in .obj (robust for hot reload)
+    # /Gw = Function-level linking (similar to -ffunction-sections)
+    # /Gy = Function-level linking
+    # /hotpatch = Enable hotpatching padding
+    target_compile_options(${PROJECT_NAME} PRIVATE /std:c++20 /Z7 /Gw /Gy -Xclang -mno-constructor-aliases)
+
+    # Check if the compiler supports -hotpatch or /hotpatch
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+         target_compile_options(${PROJECT_NAME} PRIVATE -fms-hotpatch)
+    else()
+         target_compile_options(${PROJECT_NAME} PRIVATE /hotpatch)
+    endif()
+
+    # Linker flags
+    # /FUNCTIONPADMIN = Required for Live++ hotpatching
+    # /OPT:NOREF /OPT:NOICF = Keep symbols for live editing
+    target_link_options(${PROJECT_NAME} PRIVATE "/FUNCTIONPADMIN" "/OPT:NOREF" "/OPT:NOICF" "/DEBUG:FULL")
 endif()
 
 # Set output directory
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
-
-# Copy SFML DLLs to output directory (Windows only)
-if(WIN32 AND NOT MSVC)
-    # For MinGW, check if we're using static libraries (.a files)
-    if(SFML_SYSTEM_LIB AND EXISTS "${SFML_SYSTEM_LIB}")
-        get_filename_component(SFML_SYSTEM_LIB_NAME ${SFML_SYSTEM_LIB} NAME)
-        # If using static libraries (.a), still copy dependency DLLs if they exist
-        if(SFML_SYSTEM_LIB_NAME MATCHES "\\.a$")
-            message(STATUS "Using static SFML libraries")
-            # Check for dependency DLLs that might still be needed
-            set(SFML_BIN_DIR "")
-            if(SFML_ROOT)
-                set(SFML_BIN_DIR "${SFML_ROOT}/bin")
-            elseif(EXISTS "C:/SFML-3.0.0/bin")
-                set(SFML_BIN_DIR "C:/SFML-3.0.0/bin")
-            endif()
-
-            # For static linking, copy DLLs to bin directory for runtime
-            # Even with static linking, some DLLs might be needed at runtime
-            if(SFML_BIN_DIR AND EXISTS "${SFML_BIN_DIR}")
-                # Explicitly list DLLs to avoid GLOB causing CMake regeneration
-                set(SFML_DLL_LIST
-                    "sfml-system-3.dll"
-                    "sfml-window-3.dll"
-                    "sfml-graphics-3.dll"
-                    "sfml-audio-3.dll"
-                    "sfml-network-3.dll"
-                )
-                foreach(DLL_NAME ${SFML_DLL_LIST})
-                    set(DLL_PATH "${SFML_BIN_DIR}/${DLL_NAME}")
-                    if(EXISTS "${DLL_PATH}")
-                        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                                "${DLL_PATH}"
-                                $<TARGET_FILE_DIR:${PROJECT_NAME}>
-                            COMMENT "Copying ${DLL_NAME}..."
-                        )
-                    endif()
-                endforeach()
-            endif()
-
-            # Copy MinGW64 runtime DLLs
-            set(MINGW_PATHS "C:/msys64/ucrt64" "C:/msys64/mingw64")
-            foreach(MINGW_PATH ${MINGW_PATHS})
-                if(EXISTS "${MINGW_PATH}/bin")
-                    set(MINGW_BIN_DIR "${MINGW_PATH}")
-                    set(MINGW_DLLS
-                        "libwinpthread-1.dll"
-                        "libgcc_s_seh-1.dll"
-                        "libstdc++-6.dll"
-                    )
-
-                    foreach(DLL_NAME ${MINGW_DLLS})
-                        set(DLL_PATH "${MINGW_BIN_DIR}/bin/${DLL_NAME}")
-                        if(EXISTS "${DLL_PATH}")
-                            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                                    "${DLL_PATH}"
-                                    $<TARGET_FILE_DIR:${PROJECT_NAME}>
-                                COMMENT "Copying ${DLL_NAME} from MinGW64..."
-                            )
-                        endif()
-                    endforeach()
-                    break()
-                endif()
-            endforeach()
-        else()
-            # Find SFML bin directory for dynamic linking
-            set(SFML_BIN_DIR "")
-            if(SFML_ROOT)
-                set(SFML_BIN_DIR "${SFML_ROOT}/bin")
-            elseif(EXISTS "C:/SFML-3.0.0/bin")
-                set(SFML_BIN_DIR "C:/SFML-3.0.0/bin")
-            endif()
-
-            if(SFML_BIN_DIR AND EXISTS "${SFML_BIN_DIR}")
-                # Explicitly list DLLs to avoid GLOB causing CMake regeneration
-                set(SFML_DLL_LIST
-                    "sfml-system-3.dll"
-                    "sfml-window-3.dll"
-                    "sfml-graphics-3.dll"
-                    "sfml-audio-3.dll"
-                    "sfml-network-3.dll"
-                )
-                foreach(DLL_NAME ${SFML_DLL_LIST})
-                    set(DLL_PATH "${SFML_BIN_DIR}/${DLL_NAME}")
-                    if(EXISTS "${DLL_PATH}")
-                        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                                "${DLL_PATH}"
-                                $<TARGET_FILE_DIR:${PROJECT_NAME}>
-                            COMMENT "Copying ${DLL_NAME}..."
-                        )
-                    endif()
-                endforeach()
-            endif()
-
-            # Copy MinGW64 runtime DLLs
-            set(MINGW_PATHS "C:/msys64/ucrt64" "C:/msys64/mingw64")
-            foreach(MINGW_PATH ${MINGW_PATHS})
-                if(EXISTS "${MINGW_PATH}/bin")
-                    set(MINGW_BIN_DIR "${MINGW_PATH}")
-                    set(MINGW_DLLS
-                        "libwinpthread-1.dll"
-                        "libgcc_s_seh-1.dll"
-                        "libstdc++-6.dll"
-                    )
-
-                    foreach(DLL_NAME ${MINGW_DLLS})
-                        set(DLL_PATH "${MINGW_BIN_DIR}/bin/${DLL_NAME}")
-                        if(EXISTS "${DLL_PATH}")
-                            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                                    "${DLL_PATH}"
-                                    $<TARGET_FILE_DIR:${PROJECT_NAME}>
-                                COMMENT "Copying ${DLL_NAME} from MinGW64..."
-                            )
-                        endif()
-                    endforeach()
-                    break()
-                endif()
-            endforeach()
-        endif()
-    endif()
-elseif(WIN32 AND MSVC)
-    # For MSVC, always copy DLLs (MSVC typically uses dynamic linking)
-    set(SFML_BIN_DIR "")
-    if(SFML_ROOT)
-        set(SFML_BIN_DIR "${SFML_ROOT}/bin")
-    elseif(EXISTS "C:/SFML-3.0.0/bin")
-        set(SFML_BIN_DIR "C:/SFML-3.0.0/bin")
-    endif()
-
-    if(SFML_BIN_DIR AND EXISTS "${SFML_BIN_DIR}")
-        # Explicitly list DLLs to avoid GLOB causing CMake regeneration
-        set(SFML_DLL_LIST
-            "sfml-system-3.dll"
-            "sfml-window-3.dll"
-            "sfml-graphics-3.dll"
-            "sfml-audio-3.dll"
-            "sfml-network-3.dll"
-        )
-        foreach(DLL_NAME ${SFML_DLL_LIST})
-            set(DLL_PATH "${SFML_BIN_DIR}/${DLL_NAME}")
-            if(EXISTS "${DLL_PATH}")
-                add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                        "${DLL_PATH}"
-                        $<TARGET_FILE_DIR:${PROJECT_NAME}>
-                    COMMENT "Copying ${DLL_NAME}..."
-                )
-            endif()
-        endforeach()
-    endif()
-endif()
