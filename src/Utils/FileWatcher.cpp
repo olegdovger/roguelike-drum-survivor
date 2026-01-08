@@ -64,9 +64,12 @@ void FileWatcher::scanFiles()
     
     try
     {
-        if (fs::exists(m_watchPath) && fs::is_directory(m_watchPath))
+        // Convert to absolute path to handle relative paths consistently
+        fs::path absolutePath = fs::absolute(m_watchPath);
+        
+        if (fs::exists(absolutePath) && fs::is_directory(absolutePath))
         {
-            for (const auto& entry : fs::recursive_directory_iterator(m_watchPath))
+            for (const auto& entry : fs::recursive_directory_iterator(absolutePath))
             {
                 if (entry.is_regular_file())
                 {
@@ -89,9 +92,12 @@ bool FileWatcher::hasFileChanged()
 {
     try
     {
-        if (fs::exists(m_watchPath) && fs::is_directory(m_watchPath))
+        // Convert to absolute path to handle relative paths consistently
+        fs::path absolutePath = fs::absolute(m_watchPath);
+        
+        if (fs::exists(absolutePath) && fs::is_directory(absolutePath))
         {
-            for (const auto& entry : fs::recursive_directory_iterator(m_watchPath))
+            for (const auto& entry : fs::recursive_directory_iterator(absolutePath))
             {
                 if (entry.is_regular_file())
                 {

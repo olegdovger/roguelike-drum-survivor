@@ -4,10 +4,27 @@
 #include "src/Utils/FileWatcher.h"
 #include "LPP_API_x64_CPP.h"
 
+// Helper function to get executable directory
+std::wstring GetExecutableDirectory() {
+    wchar_t path[MAX_PATH] = {0};
+    if (GetModuleFileNameW(nullptr, path, MAX_PATH) > 0) {
+        std::wstring fullPath(path);
+        size_t lastSlash = fullPath.find_last_of(L"\/");
+        if (lastSlash != std::wstring::npos) {
+            return fullPath.substr(0, lastSlash + 1);
+        }
+    }
+    return L"./";
+}
+
 int main()
 {
+    // Get executable directory for relative path resolution
+    std::wstring exeDir = GetExecutableDirectory();
+    std::wstring livePPPath = exeDir + L"ThirdParty\\LivePP\\LivePP";
+    
     // Initialize Live++
-    lpp::LppDefaultAgent lppAgent = lpp::LppCreateDefaultAgent(nullptr, L"D:/Projects/SchoolXYZ/roguelike-samurai/ThirdParty/LivePP/LivePP");
+    lpp::LppDefaultAgent lppAgent = lpp::LppCreateDefaultAgent(nullptr, livePPPath.c_str());
 
     if (lpp::LppIsValidDefaultAgent(&lppAgent))
     {
@@ -15,7 +32,8 @@ int main()
     }
 
     // Start file watcher for auto hot-reload (500ms timeout)
-    FileWatcher watcher(L"D:/Projects/SchoolXYZ/roguelike-samurai", &lppAgent, 500);
+    // Watch the current directory (where executable is located)
+    FileWatcher watcher(exeDir, &lppAgent, 500);
 
     Game game;
     game.run();
