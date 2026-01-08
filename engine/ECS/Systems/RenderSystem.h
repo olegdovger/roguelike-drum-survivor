@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../System.h"
 #include <SFML/Graphics.hpp>
+
+#include "../System.h"
 
 class RenderSystem : public System
 {

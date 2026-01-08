@@ -1,5 +1,4 @@
 #include "ECSManager.h"
-#include "System.h"
 
 Entity ECSManager::createEntity()
 {

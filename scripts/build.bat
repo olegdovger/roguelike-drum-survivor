@@ -17,7 +17,7 @@ if not exist %BUILD_DIR% (
 
 cd %BUILD_DIR%
 
-REM Configure with CMake if build.ninja doesn't exist (Ninja-specific check)
+REM Configure with CMake if build.ninja doesn't exist
 if not exist build.ninja (
     echo Configuring CMake with Ninja generator...
     cmake -G %GENERATOR% ..
@@ -46,4 +46,5 @@ echo ========================================
 echo Build completed successfully!
 echo Executable: %BUILD_DIR%\bin\roguelike-samurai.exe
 echo ========================================
+
 

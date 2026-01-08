@@ -1,11 +1,13 @@
 #include "InputSystem.h"
 #include "../ECSManager.h"
 #include "../Components.h"
-#include <SFML/Window/Keyboard.hpp>
 
 void InputSystem::update(float deltaTime, ECSManager& ecs)
 {
-    // Get all entities with input component
+
+    if (window && !window->hasFocus())
+        return;
+
     auto entities = ecs.getEntitiesWithComponent<InputComponent>();
 
     for (Entity entity : entities)
@@ -13,7 +15,6 @@ void InputSystem::update(float deltaTime, ECSManager& ecs)
         auto input = ecs.getComponent<InputComponent>(entity);
         if (!input) continue;
 
-        // Check movement keys
         input->leftPressed = (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) ||
                              sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left));
         input->rightPressed = (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D) ||

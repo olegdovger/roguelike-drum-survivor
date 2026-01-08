@@ -1,12 +1,13 @@
 #pragma once
 
-#include "Entity.h"
-#include "Component.h"
-#include "System.h"
-#include <unordered_map>
-#include <vector>
 #include <memory>
 #include <typeindex>
+#include <unordered_map>
+#include <vector>
+
+#include "Component.h"
+#include "Entity.h"
+#include "System.h"
 
 class ECSManager
 {
