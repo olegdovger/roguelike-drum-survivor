@@ -51,3 +51,8 @@
 
 # build
 build/
+CMakeFiles/
+
+# Dependencies
+ThirdParty/
+_deps/
