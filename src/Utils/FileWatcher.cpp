@@ -1,8 +1,23 @@
 #include "FileWatcher.h"
 #include "LPP_API_x64_CPP.h"
 #include <iostream>
+#include <filesystem>
 
 namespace fs = std::filesystem;
+
+bool FileWatcher::shouldEnableFileWatching() {
+    // Check for development environment indicators
+    std::error_code ec;
+    
+    // Look for common development files/directories
+    bool hasDevFiles = 
+        fs::exists(".git", ec) ||
+        fs::exists(".vscode", ec) ||
+        fs::exists("CMakeLists.txt", ec) ||
+        fs::exists("src", ec);
+        
+    return hasDevFiles;
+}
 
 FileWatcher::FileWatcher(const std::wstring& watchPath, lpp::LppDefaultAgent* agent, int timeoutMs)
     : m_watchPath(watchPath)

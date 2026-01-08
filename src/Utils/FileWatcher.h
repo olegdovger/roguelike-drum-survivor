@@ -48,6 +48,13 @@ public:
     FileWatcher(FileWatcher&&) = delete;
     FileWatcher& operator=(FileWatcher&&) = delete;
 
+    /**
+     * @brief Check if file watching should be enabled (development mode)
+     * 
+     * @return true if file watching should be enabled, false for production
+     */
+    static bool shouldEnableFileWatching();
+
 private:
     /**
      * @brief Main watch loop that runs on a separate thread

@@ -1,4 +1,6 @@
 #include <Windows.h>
+#include <iostream>
+#include <memory>
 
 #include "src/Game.h"
 #include "src/Utils/FileWatcher.h"
@@ -31,9 +33,15 @@ int main()
         lppAgent.EnableModule(lpp::LppGetCurrentModulePath(), lpp::LPP_MODULES_OPTION_ALL_IMPORT_MODULES, nullptr, nullptr);
     }
 
-    // Start file watcher for auto hot-reload (500ms timeout)
+    // Start file watcher for auto hot-reload (500ms timeout) - only in development
     // Watch the current directory (where executable is located)
-    FileWatcher watcher(exeDir, &lppAgent, 500);
+    std::unique_ptr<FileWatcher> fileWatcher;
+    if (FileWatcher::shouldEnableFileWatching()) {
+        fileWatcher = std::make_unique<FileWatcher>(exeDir, &lppAgent, 500);
+        std::cout << "Development mode: File watching enabled" << std::endl;
+    } else {
+        std::cout << "Production mode: File watching disabled" << std::endl;
+    }
 
     Game game;
     game.run();

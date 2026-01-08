@@ -15,7 +15,13 @@ public:
     }
 
     Config() {
-        load("config.ini");
+        // Try to find config file in multiple locations
+        std::string configPath = findConfigFile();
+        if (!configPath.empty()) {
+            load(configPath);
+        } else {
+            std::cerr << "Warning: config.ini not found, using defaults" << std::endl;
+        }
     }
 
     size_t registerCallback(std::function<void()> callback) {
@@ -29,10 +35,10 @@ public:
     }
 
     void update() {
-        const std::string path = "config.ini";
-        std::error_code ec;
-        if (!std::filesystem::exists(path, ec)) return;
+        const std::string path = findConfigFile();
+        if (path.empty()) return;
 
+        std::error_code ec;
         auto currTime = std::filesystem::last_write_time(path, ec);
         if (currTime != lastTime) {
             load(path);
@@ -68,6 +74,24 @@ private:
         for (const auto& [id, callback] : callbacks) {
             if (callback) callback();
         }
+    }
+
+    std::string findConfigFile() {
+        // Check multiple locations for config file
+        std::vector<std::string> possiblePaths = {
+            "config.ini",           // Current directory
+            "../config.ini",        // Parent directory (for development)
+            "../config/config.ini", // Config subdirectory
+            "config/config.ini"     // Config subdirectory in current dir
+        };
+
+        for (const auto& path : possiblePaths) {
+            std::error_code ec;
+            if (std::filesystem::exists(path, ec)) {
+                return path;
+            }
+        }
+        return "";
     }
 
     void load(const std::string& path) {
